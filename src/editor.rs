@@ -58,20 +58,37 @@ impl Editor {
 
     pub fn handle_key(&mut self, key: KeyEvent) {
         match key.code {
-            KeyCode::Char(c) => self.insert_char(c),
+            KeyCode::Char(c) => self.insert_char(c, true),
             KeyCode::Backspace => self.backspace(),
             KeyCode::Enter => self.new_line(),
             KeyCode::Left => self.move_left(),
             KeyCode::Right => self.move_right(),
             KeyCode::Up => self.move_up(),
             KeyCode::Down => self.move_down(),
+            KeyCode::Tab => self.tab(),
             _ => {}
         }
     }
 
-    fn insert_char(&mut self, c: char) {
+    fn tab(&mut self) {
+        self.lines[self.cursor_y] += "        ";
+        self.cursor_x += 8;
+    }
+
+    fn insert_char(&mut self, c: char, update_cursor: bool) {
         self.lines[self.cursor_y].insert(self.cursor_x, c);
-        self.cursor_x += 1;
+        if update_cursor {
+            self.cursor_x += 1;
+        } else {
+            return;
+        }
+        match c {
+            '(' => self.insert_char(')', false),
+            '{' => self.insert_char('}', false),
+            '"' => self.insert_char('"', false),
+            '\u{0027}' => self.insert_char('\u{0027}', false),
+            _ => {}
+        }
     }
 
     fn backspace(&mut self) {
